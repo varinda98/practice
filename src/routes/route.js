@@ -2,6 +2,71 @@ const express = require('express');
 const abc = require('../introduction/intro')
 const router = express.Router();
 
+// solution 1
+router.get('/movie' , function (req, res){
+let movie = ['Rang de basanti', 'The shining', 'Lord of the rings', 'Batman begins']
+res.send(movie)
+});
+
+// solution 2
+router.get('/movies/:indexNumber', function(req, res){
+  let movies = ['Rang de basanti', 'The shining', 'Lord of the rings', 'Batman begins']
+  const index = req.params.indexNumber
+
+// solution 3: error handling
+
+  if(index > movies.length || index < 0){
+  res.send("error: use a valid address")
+  }
+  
+   res.send(movies[index])
+})
+
+// solution 4
+
+router.get('/movieArr' , function(req, res){
+  let movieArr = [ {
+    id: 1,
+    name: 'The Shining'
+   }, {
+    id: 2,
+    name : 'Incendies'
+   }, {
+    id: 3,
+    name: 'Rang de Basanti'
+   }, {
+    id: 4,
+    name: 'Finding Nemo'
+   }]
+   res.send(movieArr)
+})
+
+// solution 5
+router.get('/films/:filmId', function(req, res){
+  let films = [ {
+    id: 1,
+    name: 'The Shining'
+   }, {
+    id: 2,
+    name : 'Incendies'
+   }, {
+    id: 3,
+    name: 'Rang de Basanti'
+   }, {
+    id: 4,
+    name: 'Finding Nemo'
+   }]
+
+   const index = req.params.filmId
+
+   // error handling
+   if(index > films.length){
+    res.send("no movie exists with thsi id")
+   }
+res.send(films[index])
+})
+
+
 router.get('/test-me', function (req, res) {
     console.log('My batch is', abc.name)
     abc.printName()
