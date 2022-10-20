@@ -41,6 +41,87 @@ router.get("/test-api-6" , function(req, res) {
     res.send({a:56, b: 45})
 })
 
+// assignment solution - 1
+
+router.get('/missingNumber', (req, res) => {
+  const arr = [1, 2, 3, 5, 6, 7];
+  let missingNumber = 0;
+  for (let i = 0; i < arr.length; i++) {
+      if (arr[i] + 1 !== arr[i + 1]) {
+          missingNumber = arr[i] + 1;
+          break;
+      }
+  }
+  res.send(`The missing number is ${missingNumber}`);
+});
+
+// assignment solution - 2
+
+router.get('/missingNumber-2', (req, res) => {
+  const arr = [33, 34, 35, 37, 38];
+  let missingNumber = 0;
+  for (let i = 0; i < arr.length; i++) {
+      if (arr[i] + 1 !== arr[i + 1]) {
+          missingNumber = arr[i] + 1;
+          break;
+      }
+  }
+  res.send(`The missing number is ${missingNumber}`);
+});
+
+// assignment solution - 3
+ 
+let players =
+   [
+       {
+           "name": "manish",
+           "dob": "1/1/1995",
+           "gender": "male",
+           "city": "jalandhar",
+           "sports": [
+               "swimming"
+           ]
+       },
+       {
+           "name": "gopal",
+           "dob": "1/09/1995",
+           "gender": "male",
+           "city": "delhi",
+           "sports": [
+               "soccer"
+           ],
+       },
+       {
+           "name": "lokesh",
+           "dob": "1/1/1990",
+           "gender": "male",
+           "city": "mumbai",
+           "sports": [
+               "soccer"
+           ],
+       },
+   ]
+ 
+   router.post('/players', function (req, res) {
+ 
+       //LOGIC WILL COME HERE
+       const body = req.body
+       // player name should be unique
+       const player = players.find(x => x.name === body.name)
+       // if no match found... then find witll return undefined/ null ==> false
+       // if match ..will return player => true
+       if(player){
+        res.send({message: "player already exist"})
+       }else{
+        players.push(body)
+        res.send(players)
+       }
+       
+   })
+
+
+
+
 router.post("/test-post", function(req, res) {
     res.send([ 23, 45 , 6])
 })
@@ -60,6 +141,7 @@ router.post("/test-post-3", function(req, res) {
 
     res.send(  { msg: "hi" , status: true }  )
 })
+
 
 
 
