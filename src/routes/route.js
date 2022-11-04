@@ -13,6 +13,9 @@ router.get("/test-me", function (req, res,next) {
 router.get("/getIpAddress",commonMW.mid5,UserController.getIpAdress)
 router.get("/getCurrentTime",commonMW.mid5,UserController.getCurrentTime)
 router.get("/getPath", commonMW.mid5,UserController.getPath)
+
+
+
 router.post("/createBook", BookController.createBook  )
 
 // router.post("/createUser", UserController.createUser  )
@@ -43,12 +46,21 @@ router.post("/createBook", BookController.createBook  )
 // router.get('/register',  UserController.register)
 
 
+
+
+
 router.get("/basicRoute",commonMW.mid1,UserController.basicCode)
+
+
+
+
 
 
 // router.get("/basicRoute2", commonMW.mid1, UserController.basicCode2)
 // router.get("/basicRoute3", commonMW.mid2, UserController.basicCode3)
 // router.get("/basicRoute4", commonMW.mid1, commonMW.mid4, UserController.basicCode4)
+
+
 
 
 module.exports = router;

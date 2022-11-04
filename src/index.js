@@ -8,19 +8,19 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-mongoose.connect("mongodb+srv://varinda:Flipkart@newproject.7qwzr8u.mongodb.net/test", {
+mongoose.connect("mongodb+srv://varinda:Flipkart@newproject.7qwzr8u.mongodb.net/middleWare", {
     useNewUrlParser: true
 })
 .then( () => console.log("MongoDb is connected"))
 .catch ( err => console.log(err) )
-
-app.use (
-    function (req, res, next) {
-        console.log ("inside GLOBAL MW");
-        next();
-  }
-  );
-
+app.use(
+    function (req,res,next){
+        let ip = req.ip
+        let url = req.url
+        let ts =Date()
+        console.log({ts:ts,ip:ip,route:url});
+    }
+);
 app.use('/', route);
 
 
