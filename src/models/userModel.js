@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema( {
     firstName: String,
     lastName: String,
     mobile: {
-        type: Number,
+        type: String,
 
         required: true
     },
@@ -15,8 +15,8 @@ const userSchema = new mongoose.Schema( {
         enum: ["male", "female", "other"]
     },
     isDeleted: {
-        type: Boolean,
-        default: false
+        type:Boolean,
+        default:false,
     },
     age: Number,
 }, { timestamps: true });

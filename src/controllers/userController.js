@@ -14,42 +14,96 @@ const userModel = require("../models/userModel");
 //   xyz.send({ msg: savedData });
 // };
 
-const createUser = async function(req, res){
-      let data = req.body
-      let savedData = await userModel.create(data)
-      res.send(savedData)
+const createUser = async function (req,res){
+  let data = req.body;
+  let savedData = await userModel.create(data)
+  res.send({ users: savedData})
 }
 
-const loginUser = async function (req, res) {
-  let userName = req.body.emailId;
-  let password = req.body.password;
+// const loginUser = async function (req, res) {
+//   let userName = req.body.emailId;
+//   let password = req.body.password;
 
-  let user = await userModel.findOne({ emailId: userName, password: password });
+//   let user = await userModel.findOne({ emailId: userName, password: password });
+//   if (!user)
+//     return res.send({
+//       status: false,
+//       msg: "username or the password is not corerct",
+//     });
+
+//   // Once the login is successful, create the jwt token with sign function
+//   // Sign function has 2 inputs:
+//   // Input 1 is the payload or the object containing data to be set in token
+//   // The decision about what data to put in token depends on the business requirement
+//   // Input 2 is the secret (This is basically a fixed value only set at the server. This value should be hard to guess)
+//   // The same secret will be used to decode tokens 
+//   let token = jwt.sign(
+//     {
+//       userId: user._id.toString(),
+//       batch: "thorium",
+//       organisation: "FunctionUp",
+//     },
+//     "functionup-plutonium-very-very-secret-key"
+//   );
+//   res.setHeader("x-auth-token", token);
+//   res.send({ status: true, token: token });  
+// };
+
+
+let loginUser = async function (req, res) { 
+  let userName = req.body.emailId
+  let password = req.body.password
+
+  let user = await userModel.findOne({ emailId : userName,password: password})
   if (!user)
-    return res.send({
-      status: false,
-      msg: "username or the password is not corerct",
-    });
+    res.send({status:false, result: "username or password in not correct"})  
 
-  // Once the login is successful, create the jwt token with sign function
-  // Sign function has 2 inputs:
-  // Input 1 is the payload or the object containing data to be set in token
-  // The decision about what data to put in token depends on the business requirement
-  // Input 2 is the secret (This is basically a fixed value only set at the server. This value should be hard to guess)
-  // The same secret will be used to decode tokens 
-  let token = jwt.sign(
-    {
-      userId: user._id.toString(),
-      batch: "thorium",
-      organisation: "FunctionUp",
-    },
-    "functionup-plutonium-very-very-secret-key"
-  );
-  res.setHeader("x-auth-token", token);
-  res.send({ status: true, token: token });
-};
+    let token = jwt.sign(
+      {
+        userId: user.id,
+        batch: "Lithium",
+      organisation: "FunctionUp" 
+      },"FunctionUp's lithium's secret key"
+    )
+    res.setHeader("x-auth-token",token)
+    res.send({status: true, token: token})
+
+}
+
+
 
 const getUserData = async function (req, res) {
+  let userId = req.params.userId;
+  let userDetails = await userModel.findById(userId);
+  if (!userDetails)
+    return res.send({ status: false, msg: "No such user exists" });
+
+  res.send({ status: true, data: userDetails }); 
+}
+
+
+
+
+
+const updatedata = async function(req,res){  
+  let userId = req.params.userId
+  let data = req.body
+  let update = await userModel.findByIdAndUpdate(userId, data, {new:true});
+  res.send(update)
+  }
+
+const deleteData = async function(req,res){
+  let userId = req.params.userId
+  let update = await userModel.findByIdAndUpdate(userId, {isDeleted: true}, {new:true})
+  res.send(update)
+
+}
+
+
+
+
+
+const getUserData1 = async function (req, res) {
   let token = req.headers["x-Auth-token"];
   if (!token) token = req.headers["x-auth-token"];
 
@@ -80,7 +134,10 @@ const getUserData = async function (req, res) {
   // Note: Try to see what happens if we change the secret while decoding the token
 };
 
-const updateUser = async function (req, res) {
+
+
+
+const updateUser1 = async function (req, res) {
   // Do the same steps here:
   // Check if the token is present
   // Check if the token present is a valid token
@@ -100,5 +157,7 @@ const updateUser = async function (req, res) {
 
 module.exports.createUser = createUser;
 module.exports.getUserData = getUserData;
-module.exports.updateUser = updateUser;
+// module.exports.updateUser = updateUser;
 module.exports.loginUser = loginUser;
+module.exports.updatedata = updatedata;
+module.exports.deleteData = deleteData;
