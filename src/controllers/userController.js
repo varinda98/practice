@@ -85,101 +85,121 @@ const userModel = require("../models/userModel");
 // };
 
 const postMessage = async function (req, res) {
-  let message = req.body.message
-  // Check if the token is present
-  // Check if the token present is a valid token
-  // Return a different error message in both these cases
-  let token = req.headers["x-auth-token"]
-  if (!token) return res.send({ status: false, msg: "token must be present in the request header" })
-  let decodedToken = jwt.verify(token, 'functionup-thorium')
+    let message = req.body.message
+    // Check if the token is present
+    // Check if the token present is a valid token
+    // Return a different error message in both these cases
+    let token = req.headers["x-auth-token"]
+    if (!token) return res.send({ status: false, msg: "token must be present in the request header" })
+    let decodedToken = jwt.verify(token, 'functionup-thorium')
 
-  if (!decodedToken) return res.send({ status: false, msg: "token is not valid" })
+    if (!decodedToken) return res.send({ status: false, msg: "token is not valid" })
 
-  //userId for which the request is made. In this case message to be posted.
-  let userToBeModified = req.params.userId
-  //userId for the logged-in user
-  let userLoggedIn = decodedToken.userId
+    //userId for which the request is made. In this case message to be posted.
+    let userToBeModified = req.params.userId
+    //userId for the logged-in user
+    let userLoggedIn = decodedToken.userId
 
-  //userId comparision to check if the logged-in user is requesting for their own data
-  if (userToBeModified != userLoggedIn) return res.send({ status: false, msg: 'User logged is not allowed to modify the requested users data' })
+    //userId comparision to check if the logged-in user is requesting for their own data
+    if (userToBeModified != userLoggedIn) return res.send({ status: false, msg: 'User logged is not allowed to modify the requested users data' })
 
-  let user = await userModel.findById(req.params.userId)
-  if (!user) return res.send({ status: false, msg: 'No such user exists' })
+    let user = await userModel.findById(req.params.userId)
+    if (!user) return res.send({ status: false, msg: 'No such user exists' })
 
-  let updatedPosts = user.posts
-  //add the message to user's posts
-  updatedPosts.push(message)
-  let updatedUser = await userModel.findOneAndUpdate({ _id: user._id }, { posts: updatedPosts }, { new: true })
+    let updatedPosts = user.posts
+    //add the message to user's posts
+    updatedPosts.push(message)
+    let updatedUser = await userModel.findOneAndUpdate({ _id: user._id }, { posts: updatedPosts }, { new: true })
 
-  //return the updated user document
-  return res.send({ status: true, data: updatedUser })
+    //return the updated user document
+    return res.send({ status: true, data: updatedUser })
 }
 
 
 
 const createUser = async function (req, res) {
-  let data = req.body;
-  let savedData = await userModel.create(data);
+    try {
+        let data = req.body;
+        let savedData = await userModel.create(data);
 
-  res.send({ user: savedData });
+        res.status(201).send({ user: savedData });
+    } catch (error) {
+        res.status(500).send({ msg: "SERVER SIGHT ISSUE", type: error.message })
+    }
 };
 
 const loginUser = async function (req, res) {
-  let userName = req.body.emailId
-  let password = req.body.password
-  let loginInfo = await userModel.findOne({ emailId: userName, password: password });
-  if (!loginInfo){
-    res.send({
-      status: false,
-      msg: "Username or Password is not available or incorrect"
-    })}else {
-    let token = jwt.sign({ userId: userName, password: password }, "secret Key")
-    res.setHeader("x-auth-token", token);
-    res.send({ status: true, data: token });
-  }
+    try {
+        let userName = req.body.emailId
+        let password = req.body.password
+        let loginInfo = await userModel.findOne({ emailId: userName, password: password });
+        if (!loginInfo) {
+            res.status(400).send({
+                status: false,
+                msg: "Username or Password is not available or incorrect"
+            })
+        } else {
+            let token = jwt.sign({ userId: userName, password: password }, "secret Key")
+            res.setHeader("x-auth-token", token);
+            res.status(200).send({ status: true, data: token });
+        }
+    } catch (error) {
+        res.status(500).send({ msg: "SERVER SIGHT ISSUE", type: error.message })
+    }
 }
 
 const getUserData = async function (req, res) {
-  let token = req.headers["x-auth-token"];
-  if (!token)
-   res.send({ status: false, msg: "token must be present" });
-  let validToken = jwt.verify(token, "secret Key");
-  if (!validToken)
-   res.send({ status: false, msg: "token is invalid" });
+    try {
+        let token = req.headers["x-auth-token"];
+        if (!token)
+        res.status(403).send({ status: false, msg: "ACCESS DENIED token must be present in the request header" })
+        let validToken = jwt.verify(token, "secret Key");
+        if (!validToken)
+        res.status(400).send({ status: false, msg: "GIVEN TOKEN IS NOT VALID" })
 
-  let userId = req.params.userId;
-  let userDetails = await userModel.findById(userId);
-  if (!userDetails)
-  res.send({ status: false, msg: "No such user exists" });
+        let userId = req.params.userId;
+        let userDetails = await userModel.findById(userId);
+        if (!userDetails)
+        res.status(404).send({ status: false, msg: "USER NOT FOUND" })
 
-  res.send({ status: true, data: userDetails });
+        res.status(200).send({ status: true, data: userDetails });
+    } catch (error) {
+        res.status(500).send({ msg: "SERVER SIGHT ISSUE", type: error.message })
+    }
 };
 
-const updateUser = async function (req, res){
-  
-  
-  let token = req.headers["x-auth-token"]
-  if (!token)
-  res.send({ status: false, msg: "token must be present in the request header" })
-  let validToken = jwt.verify(token, 'secret Key')
-  
-  if (!validToken)
-  res.send({ status: false, msg: "token is not valid" })
-  
-  let userId = req.params.userId
-  let user = await userModel.findById(userId)
-  if(!user)
-  res.send({status: false, msg: "user not exists"})
-  
-  let userData = req.body;
-  let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, userData);
-  res.send({ status: true, data: updatedUser });
+const updateUser = async function (req, res) {
+
+    try {
+        let token = req.headers["x-auth-token"]
+        if (!token)
+            res.status(403).send({ status: false, msg: "ACCESS DENIED" ("token must be present in the request header") })
+        let validToken = jwt.verify(token, 'secret Key')
+
+        if (!validToken)
+            res.status(400).send({ status: false, msg: "GIVEN TOKEN IS NOT VALID" })
+
+        let userId = req.params.userId
+        let user = await userModel.findById(userId)
+        if (!user)
+            res.status(404).send({ status: false, msg: "USER NOT FOUND" })
+
+        let userData = req.body;
+        let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, userData);
+        res.status(200).send({ status: true, data: updatedUser });
+    } catch (error) {
+        res.status(500).send({ msg: "SERVER SIGHT ISSUE", type: error.message })
+    }
 };
 
-const deleteUser = async function (req, res){
-  let userId = req.params.userId
-  let deleteData = await userModel.findByIdAndUpdate(userId,{isDeleted:true},{new:true})
-  res.send({msg: deleteData})
+const deleteUser = async function (req, res) {
+    try {
+        let userId = req.params.userId
+        let deleteData = await userModel.findByIdAndUpdate(userId, { isDeleted: true }, { new: true })
+        res.status(200).send({ msg: deleteData })
+    } catch (error) {
+        res.status(500).send({ msg: "SERVER SIGHT ISSUE", type: error.message })
+    }
 }
 
 
